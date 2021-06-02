@@ -54,6 +54,7 @@ def save_output_txt_files(folder, shared_dict):
 
 
 def save_single_pcloud(shared_dict,
+                       align_mode, 
                        path,
                        folder,
                        pinhole_folder,
@@ -74,7 +75,7 @@ def save_single_pcloud(shared_dict,
                        ):
     suffix = '_cam' if save_in_cam_space else ''
     output_path = str(path)[:-4] + f'{suffix}.ply'
-
+    # import pdb; pdb.set_trace()
 
 #    if Path(output_path).exists():
 #        print(output_path + ' is already exists, skip generating this pclouds')
@@ -98,11 +99,11 @@ def save_single_pcloud(shared_dict,
         # Clamp depth values
         img[img < clamp_min] = 0
         img[img > clamp_max] = 0
-
     # Get xyz points in camera space
     points = get_points_in_cam_space(img, lut)
     if save_in_cam_space:
-        save_ply(output_path, points, rgb=None)
+        pass
+        # save_ply(output_path, points, rgb=None)
         # print('Saved %s' % output_path)
     else:
         if rig2world_transforms and (timestamp in rig2world_transforms):
@@ -118,7 +119,7 @@ def save_single_pcloud(shared_dict,
                 # get the pv frame which is closest in time
                 target_id = match_timestamp(timestamp, pv_timestamps)
                 pv_ts = pv_timestamps[target_id]
-                rgb_path = str(folder / 'PV' / f'{pv_ts}.png')
+                rgb_path = str(folder / align_mode / f'{pv_ts}.png')
                 assert Path(rgb_path).exists()
                 pv_img = cv2.imread(rgb_path)
 
@@ -141,15 +142,17 @@ def save_single_pcloud(shared_dict,
                     rgb_proj, depth = project_on_depth(
                         points, rgb, intrinsic_matrix, width, height)
 
-                    # Save depth image
+                    # Save depth image - matches rgb name
                     depth_proj_folder = pinhole_folder / 'depth' / f'{pv_ts}.png'
                     depth_proj_path = str(depth_proj_folder)[:-4] + f'{suffix}_proj.png'
                     depth = (depth * DEPTH_SCALING_FACTOR).astype(np.uint16)
-                    cv2.imwrite(depth_proj_path, (depth).astype(np.uint16))
 
+                    cv2.imwrite(depth_proj_path, (depth).astype(np.uint16))
+                    
                     # Save rgb image
-                    rgb_proj_folder = pinhole_folder / 'rgb' / f'{pv_ts}.png'
+                    rgb_proj_folder = pinhole_folder / align_mode / f'{pv_ts}.png'
                     rgb_proj_path = str(rgb_proj_folder)[:-4] + f'{suffix}_proj.png'
+                    # cv2.imwrite(rgb_proj_path, cv2.cvtColor(rgb_proj.astype(np.uint8), cv2.COLOR_BGR2GRAY))
                     cv2.imwrite(rgb_proj_path, rgb_proj)
 
                     # Save virtual pinhole information inside calibration.txt
@@ -161,6 +164,10 @@ def save_single_pcloud(shared_dict,
                                 {intrinsic_list[1]} \
                                 {intrinsic_list[2]} \
                                 {intrinsic_list[3]} \n")
+
+                    # extrinsic_folder = pinhole_folder / 'pose' / f'{pv_ts}.png'
+                    # extrinsic_path = str(extrinsic_folder)[:-4] + f'{suffix}_proj.txt'
+                    # np.savetxt(extrinsic_path, cam2world_transform)
 
                     # Create rgb and depth paths
                     rgb_parts = Path(rgb_proj_path).parts[2:]
@@ -174,12 +181,14 @@ def save_single_pcloud(shared_dict,
                     # Save depth, rgb, camera center, extrinsics inside shared dictionary
                     shared_dict[path.stem] = [depth_tmp, rgb_tmp,
                                               camera_center[:3], cam2world_transform]
+                    # import pdb; pdb.set_trace()                                              
 
             if discard_no_rgb:
+                print('discard no rgb')
                 colored_points = rgb[:, 0] > 0
                 xyz = xyz[colored_points]
                 rgb = rgb[colored_points]
-            save_ply(output_path, xyz, rgb, cam2world_transform)
+            # save_ply(output_path, xyz, rgb, cam2world_transform)
             # print('Saved %s' % output_path)
         else:
             print('Transform not found for timestamp %s' % timestamp)
@@ -236,6 +245,7 @@ def load_rig2world_transforms(path):
 
 
 def save_pclouds(folder,
+                 align_mode,
                  sensor_name,
                  save_in_cam_space=False,
                  discard_no_rgb=False,
@@ -273,7 +283,6 @@ def save_pclouds(folder,
 
     # lookup table to extract xyz from depth
     lut = load_lut(calib_path)
-
     # from camera to rig space transformation (fixed)
     rig2cam = load_extrinsics(rig2campath)
 
@@ -289,7 +298,7 @@ def save_pclouds(folder,
         pinhole_folder = folder / 'pinhole_projection'
         pinhole_folder.mkdir(exist_ok=True)
 
-        pinhole_folder_rgb = pinhole_folder / 'rgb'
+        pinhole_folder_rgb = pinhole_folder / align_mode
         pinhole_folder_rgb.mkdir(exist_ok=True)
 
         pinhole_folder_depth = pinhole_folder / 'depth'
@@ -297,7 +306,8 @@ def save_pclouds(folder,
 
     # Extract tar only when calling the script directly
     if __name__ == '__main__':
-        extract_tar_file(str(folder / '{}.tar'.format(sensor_name)), str(depth_path))
+        if not (Path(args.recording_path) / f"{sensor_name}").exists():
+            extract_tar_file(str(folder / '{}.tar'.format(sensor_name)), str(depth_path))
 
     # Depth path suffix used for now only if we load masked AHAT
     depth_paths = sorted(depth_path.glob('*[0-9]{}.pgm'.format(depth_path_suffix)))
@@ -311,6 +321,7 @@ def save_pclouds(folder,
     for path in depth_paths:
         multiprocess_pool.apply_async(
             save_single_pcloud(shared_dict,
+                               align_mode, 
                                path,
                                folder,
                                pinhole_folder,
@@ -342,6 +353,9 @@ if __name__ == '__main__':
     parser.add_argument("--recording_path",
                         required=True,
                         help="Path to recording folder")
+    parser.add_argument("--align_mode",
+                        required=True,
+                        help="PV or labels")
     parser.add_argument("--cam_space",
                         required=False,
                         action='store_true',
@@ -376,8 +390,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     for sensor_name in ["Depth Long Throw", "Depth AHaT"]:
-        if (Path(args.recording_path) / f"{sensor_name}.tar").exists():
+        if (Path(args.recording_path) / f"{sensor_name}.tar").exists() or (Path(args.recording_path) / f"{sensor_name}").exists():
             save_pclouds(Path(args.recording_path),
+                         args.align_mode,
                          sensor_name,
                          args.cam_space,
                          args.discard_no_rgb,
