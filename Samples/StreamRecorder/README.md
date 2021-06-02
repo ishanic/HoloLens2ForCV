@@ -39,14 +39,13 @@ Requirements: python3 with numpy, opencv-python, open3d.
 
 The app comes with a set of python scripts. Note that all the functionalities provided by these scripts can be accessed via the `recorder_console.py` script, which in turn launches `process_all.py`, so there is in principle no need to use single scripts.
 
-- All the scripts listed below can be launched by running `process_all.py`:
-```
-  python process_all.py --recording_path <path_to_capture_folder>
-```
-
 - PV (RGB) frames are saved in raw format. To obtain RGB png images, you can run the `convert_images.py` script:
 ```
   python convert_images.py --recording_path <path_to_capture_folder>
+```
+- Install Detectron2. To obtain semantic instance segmentation of RGB images, you can run the `run_detector.py` script:
+```
+  python run_detector.py --recording_path <path_to_capture_folder> --valid_categories <comma separated list of objects of interest within quotes and without spaces>
 ```
 
 - To see hand tracking and eye gaze tracking results projected on PV images, you can run:
@@ -55,6 +54,22 @@ The app comes with a set of python scripts. Note that all the functionalities pr
 ```
 
 - To obtain (colored) point clouds from depth images and save them as ply files, you can run the `save_pclouds.py` script.
+```
+  python save_pclouds.py --pinhole_path <path_to_pinhole_folder_inside_capture_folder> --align_mode <PV or labels>
+```
+
+- To make sure the list of paths is set correctly, run gen_lists_for_tsdf_integration.py
+```
+  python gen_lists_for_tsdf_integration.py --pinhole_path <path_to_pinhole_folder_inside_capture_folder> --align_mode <PV or labels>
+```
+
+- Finally, run tsdf-integration.py
+```
+  python tsdf-integration.py --pinhole_path <path_to_pinhole_folder_inside_capture_folder> --align_mode <PV or labels>
+```
+The mesh and point cloud ply files are saved in the working directory
+
+
 
 All the point clouds are computed in the world coordinate system, unless the `cam_space` parameter is used. If PV frames were captured, the script will try to color the point clouds accordingly.
 
