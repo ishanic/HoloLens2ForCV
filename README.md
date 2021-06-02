@@ -1,5 +1,12 @@
-
 # Purpose
+
+(ishanic): Perform label fusion on the Hololens captures. Use off-the-shelf detection along with tsdf-fusion to propagate labels spatio-temporally over the entire volume.
+Check setup instructions under StreamRecorder app.
+
+![FusedRGB](https://user-images.githubusercontent.com/6719372/120415390-4fc2ed80-c310-11eb-8d30-52f2a97b840a.PNG)
+
+![FusedLabels](https://user-images.githubusercontent.com/6719372/120415402-5487a180-c310-11eb-9ae1-48132d209861.PNG)
+
 
 HoloLens 2 Research Mode enables access to the raw streams on device (depth camera, gray-scale cameras, IMU).
 
