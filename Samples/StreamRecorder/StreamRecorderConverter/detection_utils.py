@@ -9,7 +9,7 @@ import sys
 class MaskRCNNDetector():
     def __init__(self, config_file, valid_categories=None):
         from detectron2.config import get_cfg
-        from meshrcnn.config import get_meshrcnn_cfg_defaults
+        # from meshrcnn.config import get_meshrcnn_cfg_defaults
         from detectron2.data import MetadataCatalog
         from detectron2.data.detection_utils import read_image
         from detectron2.engine.defaults import DefaultPredictor
@@ -19,11 +19,10 @@ class MaskRCNNDetector():
         import detectron2.data.transforms as T
         from detectron2.checkpoint import DetectionCheckpointer
         from detectron2.export import Caffe2Tracer
-        import onnx
-
+        
 		#self.valid_categories = ['bench', 'chair', 'couch', 'dining table', 'laptop', 'tv'] #'person', 'potted plant'
         cfg = get_cfg()
-        get_meshrcnn_cfg_defaults(cfg)
+        # get_meshrcnn_cfg_defaults(cfg)
         cfg.merge_from_file(config_file)
         cfg_onnx = cfg.clone()
         cfg_onnx.MODEL.DEVICE = "cpu"
@@ -55,7 +54,6 @@ class MaskRCNNDetector():
         # dummy_input['image_id'] = 1
         dummy_input['image'] = torch.randn(3, 800, 800)
         first_batch = [dummy_input]
-        print(cfg_onnx.MODEL.DEVICE)
         self.tracer = Caffe2Tracer(cfg_onnx, self.model, first_batch)
 
         self.transform_gen = T.ResizeShortestEdge(

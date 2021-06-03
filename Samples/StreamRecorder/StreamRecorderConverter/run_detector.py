@@ -31,7 +31,7 @@ Path(join(basedir, f'{dest}')).mkdir(exist_ok=True)
 # import pdb; pdb.set_trace()
 valid_categories = args.valid_categories.split(',')
 
-config_file = "/home/ischakra/3D/OU/eval/configs/pix3d/mask_rcnn_R_50_FPN_inference_acc_test.yaml"
+config_file = "configs/mask_rcnn_R_50_FPN_inference_acc_test.yaml"
 detector = MaskRCNNDetector(config_file, valid_categories=valid_categories)
 colors = []
 for vc in valid_categories:
