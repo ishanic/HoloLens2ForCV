@@ -37,7 +37,12 @@ To postprocess the recorded data, you can use the python scripts inside the `Str
 
 Requirements: python3 with numpy, opencv-python, open3d.
 
-The app comes with a set of python scripts. Note that all the functionalities provided by these scripts can be accessed via the `recorder_console.py` script, which in turn launches `process_all.py`, so there is in principle no need to use single scripts.
+The app comes with a set of python scripts. 
+
+- To run all the scripts sequentially, launch 
+```
+./run.sh <path_to_capture_folder>
+```
 
 - PV (RGB) frames are saved in raw format. To obtain RGB png images, you can run the `convert_images.py` script:
 ```
