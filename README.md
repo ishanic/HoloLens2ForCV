@@ -8,9 +8,7 @@ Check setup instructions under StreamRecorder app.
 
 ![FusedLabels](https://user-images.githubusercontent.com/6719372/120415402-5487a180-c310-11eb-9ae1-48132d209861.PNG)
 
-![FusedRGB](https://user-images.githubusercontent.com/6719372/120421999-37f16680-c31c-11eb-9cfb-29bfa97569a2.PNG)
-
-![FusedLabels](https://user-images.githubusercontent.com/6719372/120422006-3b84ed80-c31c-11eb-9a00-c9bb08e4aa5f.PNG)
+![FusedRGBLabels](https://user-images.githubusercontent.com/6719372/120576108-1608ea00-c3d7-11eb-882a-e3de90be1286.PNG)
 
 HoloLens 2 Research Mode enables access to the raw streams on device (depth camera, gray-scale cameras, IMU).
 
