@@ -1,8 +1,11 @@
 # Purpose
 
-(ishanic): Perform label fusion on the Hololens captures. Use off-the-shelf detection along with tsdf-fusion to propagate labels spatio-temporally over the entire volume.
+(ishanic): Code to perform 3D label fusion on Hololens data. This code is an extension to the original Hololens Research API – https://github.com/microsoft/HoloLens2ForCV
+If you are already familiar with the capture app, proceed to the instructions in https://github.com/ishanic/HoloLens2ForCV/tree/main/Samples/StreamRecorder to run the pipeline for label fusion.
+
+The idea is to fuse the per-frame detection labels (e.g., from MaskRCNN) using TSDF-fusion (Curless & Levoy algorithm, https://graphics.stanford.edu/papers/volrange/volrange.pdf) 
+It works quite well on volumetric objects such as couches, tables, chairs, computers, laptops etc. that have constrained shapes.
 The scan below shows labeled couches, dining table, TV, chairs, windows and doors.
-Check setup instructions under StreamRecorder app.
 
 ![FusedRGB](https://user-images.githubusercontent.com/6719372/120415390-4fc2ed80-c310-11eb-8d30-52f2a97b840a.PNG)
 
